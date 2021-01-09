@@ -4,6 +4,11 @@ import com.calculator.Calculator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.security.Key;
 
 public class Block extends JPanel {
     private Calculation calculation;
@@ -58,14 +63,25 @@ public class Block extends JPanel {
             input.setPreferredSize(new Dimension(ContentPane.WIDTH/3, HEIGHT/2));
             input.setRequestFocusEnabled(true);
             reassignPopup.add(input);
+
+            ActionListener submitAction = action -> {
+                String out = input.getText().strip();
+                outputLabel.setText(calculation.input + " = " + out);
+                Calculator.addVariable(calculation.input, out, true);
+                reassignPopup.setVisible(false);
+            };
+
+            input.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    super.keyPressed(e);
+                    if (e.getKeyChar() != KeyEvent.VK_ENTER) return;
+                    submitAction.actionPerformed(new ActionEvent(this, 0, "send"));
+                }
+            });
             reassignPopup.add(new JButton("Submit") {
                 {
-                    addActionListener(action -> {
-                        String out = input.getText().strip();
-                        outputLabel.setText(calculation.input + " = " + out);
-                        Calculator.addVariable(calculation.input, out, true);
-                        reassignPopup.setVisible(false);
-                    });
+                    addActionListener(submitAction);
                 }
             });
 

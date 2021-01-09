@@ -2,8 +2,6 @@ package com.calculator;
 
 import java.util.*;
 
-import static com.calculator.Operators.*;
-
 public class Calculator {
     private static HashMap<String, String> variables = new HashMap<>();
 
@@ -21,14 +19,16 @@ public class Calculator {
         return variables.entrySet();
     }
 
-    public static String binaryEval(String operand1, String operand2, int operator) throws NumberFormatException {
+    public static String binaryEval(String operand1, String operand2, Operators operator) throws NumberFormatException {
+        if(operand1.startsWith("~")) operand1 = operand1.replace('~', '-');
+        if(operand2.startsWith("~")) operand2 = operand2.replace('~', '-');
+
         double x, y;
         x = Double.parseDouble(operand1);
         y = Double.parseDouble(operand2);
 
         return switch(operator) {
             case ADDITION -> String.valueOf(x+y);
-            case SUBTRACTION -> String.valueOf(x-y);
             case MULTIPLICATION -> String.valueOf(x*y);
             case DIVISION -> String.valueOf(x/y);
             case EXPONENTIATION-> String.valueOf(Math.pow(x,y));

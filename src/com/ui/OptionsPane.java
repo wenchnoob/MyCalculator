@@ -19,7 +19,6 @@ public class OptionsPane extends JPanel {
     JButton viewVariable = new JButton("View Variables");
 
     private OptionsPane() {
-
         help.addActionListener(action -> helpPopup.show(ContentPane.self, ContentPane.WIDTH/5, ContentPane.HEIGHT/6));
         addVariable.addActionListener(action -> addVariablePopup.show(ContentPane.self, ContentPane.WIDTH/5, ContentPane.HEIGHT/6));
         viewVariable.addActionListener(action -> viewVariablePopup.show(ContentPane.self, ContentPane.WIDTH/8, ContentPane.HEIGHT/6));
@@ -32,8 +31,24 @@ public class OptionsPane extends JPanel {
 
     private JPopupMenu helpPopup = new JPopupMenu("Help") {
         {
-            setBackground(Color.GRAY);
-            add(new JLabel("This is how you work this application."));
+            JTextArea info = new JTextArea("""
+                    This is a simple calculator application that allows you to
+                    input some mathematical arguments using supported operations.
+                    
+                    The supported operations are:
+                    Addition
+                    Subtraction
+                    Multiplication
+                    Division
+                    Exponentiation
+                    Radicals
+                    
+                    You are also permitted to assign and utilize variables.
+                    If the calculator returns and erroneous result it is likely you
+                    inputted an unsupported operation eg -25 root 2 or
+                    The system broke :/""");
+            info.setFocusable(false);
+            add(info);
         }
     };
 

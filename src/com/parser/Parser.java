@@ -52,20 +52,33 @@ public class Parser {
         return -1;
     };
 
+    public static final UnaryOperator<String> parseNegative = expression -> {
+        StringBuffer expressionBuf = new StringBuffer(expression);
+
+        for (int i = expressionBuf.indexOf("-", 1); i != -1; i = expressionBuf.indexOf("-", i+2)) {
+            if (i == -1) break;
+            if (Character.isDigit(expressionBuf.charAt(i-1))) expressionBuf.insert(i, '+');
+            System.out.println(expressionBuf);
+        }
+        return expressionBuf.toString();
+    };
+
+    public static final UnaryOperator<String> parseDoubleNegative = expression -> expression.replaceAll("--", "+");
+
     public static final BiFunction<String, Integer, Integer> parseLeftOperand = (target, start) -> {
         start--;
-        while(start > 0 && (Character.isDigit(target.charAt(start))  || target.charAt(start) == '.')) --start;
+        while(start > 0 && (Character.isDigit(target.charAt(start))  | target.charAt(start) == '-' | target.charAt(start) == '.')) --start;
         return start > 0? start + 1: start;
     };
 
     public static final BiFunction<String, Integer, Integer> parseRightOperand = (target, start) -> {
         start++;
-        while(start < target.length()  && (Character.isDigit(target.charAt(start)) | target.charAt(start++) == '.'));
+        while(start < target.length()  && (Character.isDigit(target.charAt(start)) | target.charAt(start) == '-' |target.charAt(start++) == '.'));
         return start < target.length() ? start-1: start;
     };
 
-    public static int parseWideOperatorRightOperand(String target, int start, int operatorType) {
-        start += Operators.get(operatorType).length()-1;
+    public static int parseWideOperatorRightOperand(String target, int start, Operators operator) {
+        start += Operators.get(operator).length()-1;
         return parseRightOperand.apply(target, start);
     }
 

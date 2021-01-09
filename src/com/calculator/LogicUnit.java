@@ -1,28 +1,30 @@
 package com.calculator;
 
-import com.calculator.Calculator;
-import com.calculator.Operators;
-
 import static com.calculator.Operators.*;
 import static com.parser.Parser.*;
 
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
 public class LogicUnit {
 
     public static String solve(final String expression) {
-        String internalRep = expression.intern();
+        String internalRep = parseNegative.apply(expression.intern());
 
         int[] sub = findSubExpression.apply(internalRep);
         if (subExpressionExists.test(sub)) {
             internalRep = internalRep.replace(internalRep.substring(sub[0], sub[1]), solve(internalRep.substring(sub[0]+1, sub[1]-1)));
         }
 
-        return solveRaw.andThen(tryToInt).apply(internalRep);
+        try {
+            return solveRaw.andThen(tryToInt).apply(internalRep);
+        } catch (NumberFormatException ex) {
+            return "NaN";
+        }
     }
 
-    private static final BiFunction<String, Integer, String> binaryEval = (expression, operator) -> {
+    private static final BiFunction<String, Operators, String> binaryEval = (expression, operator) -> {
         String operation = Operators.get(operator);
 
         while(expression.contains(operation)) {
@@ -50,24 +52,37 @@ public class LogicUnit {
         return expression;
     };
 
+    private static final UnaryOperator<String> substituteVariables = expression -> {
+        for (Map.Entry<String, String> entry: Calculator.variables()) {
+            expression = expression.replaceAll(entry.getKey(), entry.getValue());
+        }
+        return expression;
+    };
+
     private static final UnaryOperator<String> evalExponent = expression -> binaryEval.apply(expression, EXPONENTIATION);
 
     private static final UnaryOperator<String> evalRadical = expression -> binaryEval.apply(expression, RADICAL);
 
     private static final UnaryOperator<String> evalMultiplication = expression -> binaryEval.apply(expression, MULTIPLICATION);
 
+    private static final UnaryOperator<String> evalModulus = expression -> binaryEval.apply(expression, MODULUS);
+
     private static final UnaryOperator<String> evalDivision = expression -> binaryEval.apply(expression, DIVISION);
 
     private static final UnaryOperator<String> evalAddition = expression -> binaryEval.apply(expression, ADDITION);
 
-    private static final UnaryOperator<String> evalSubtraction = expression -> binaryEval.apply(expression, SUBTRACTION);
-
     private static final UnaryOperator<String> solveRaw =
-            expression -> evalExponent
-            .andThen(evalRadical)
-            .andThen(evalMultiplication)
-            .andThen(evalDivision)
-            .andThen(evalAddition)
-            .andThen(evalSubtraction)
-            .apply(expression);
+            expression -> substituteVariables
+                    .andThen(evalExponent)
+                    .andThen(parseDoubleNegative)
+                    .andThen(evalRadical)
+                    .andThen(parseDoubleNegative)
+                    .andThen(evalMultiplication)
+                    .andThen(parseDoubleNegative)
+                    .andThen(evalDivision)
+                    .andThen(parseDoubleNegative)
+                    .andThen(evalModulus)
+                    .andThen(parseDoubleNegative)
+                    .andThen(evalAddition)
+                    .apply(expression);
 }

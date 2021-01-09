@@ -22,9 +22,4 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    private void init() {
-
-    }
-
-
 }
